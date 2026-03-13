@@ -26,21 +26,37 @@
 
         .product-card img { width: 100%; height: 200px; object-fit: cover; }
         .product-card h3 { font-size: 16px; margin: 10px 0 5px; color: #333; }
-        .product-card p { color: #d63384; font-weight: bold; margin-bottom: 10px; }
+        .product-card .price-tag { color: #d63384; font-weight: bold; margin-bottom: 10px; display: block; }
 
-        /* The WhatsApp Button Style */
+        /* Quantity Selector Styling */
+        .qty-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+        .qty-btn {
+            background: #eee;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .qty-number { font-weight: bold; min-width: 20px; }
+
         .order-btn {
             display: inline-block;
-            background-color: #25D366; /* WhatsApp Green */
+            background-color: #25D366; 
             color: white;
             text-decoration: none;
-            padding: 8px 12px;
+            padding: 10px 15px;
             border-radius: 5px;
             font-size: 13px;
             font-weight: bold;
-            transition: background 0.3s;
         }
-        .order-btn:hover { background-color: #128C7E; }
     </style>
 </head>
 <body>
@@ -56,12 +72,32 @@
 <script>
     const PROJECT_ID = "q044uw50";
     const DATASET = "production";
-    
-    // REPLACE THIS with the lady's real phone number (include 234)
     const WHATSAPP_NUMBER = "2349133269825"; 
 
-    const QUERY = encodeURIComponent('*[_type == "product"]{name, price, "imageUrl": image.asset->url}');
+    const QUERY = encodeURIComponent('*[_type == "product"]{_id, name, price, "imageUrl": image.asset->url}');
     const URL = `https://${PROJECT_ID}.api.sanity.io/v2021-10-21/data/query/${DATASET}?query=${QUERY}`;
+
+    // Function to update the WhatsApp link based on quantity
+    function updateOrderLink(id, name, basePrice) {
+        const qty = document.getElementById(`qty-${id}`).innerText;
+        const total = basePrice * qty;
+        const btn = document.getElementById(`btn-${id}`);
+        
+        const message = encodeURIComponent(`Hello! I want to order ${qty} pieces of: ${name}. \nTotal Price: ₦${total.toLocaleString()}`);
+        btn.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`;
+    }
+
+    // Function to increase/decrease quantity
+    function changeQty(id, delta, name, basePrice) {
+        const qtyElement = document.getElementById(`qty-${id}`);
+        let currentQty = parseInt(qtyElement.innerText);
+        currentQty += delta;
+        
+        if (currentQty < 1) currentQty = 1; // Minimum 1 item
+        
+        qtyElement.innerText = currentQty;
+        updateOrderLink(id, name, basePrice);
+    }
 
     async function fetchDresses() {
         try {
@@ -77,21 +113,30 @@
             grid.innerHTML = ""; 
 
             data.result.forEach(dress => {
-                // This creates the custom message
-                const message = encodeURIComponent(`Hello! I want to order this: ${dress.name} for ₦${dress.price.toLocaleString()}`);
-                const waLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`;
-
+                const id = dress._id.replace(/[^a-zA-Z0-9]/g, ''); // Clean ID for HTML
+                const initialMsg = encodeURIComponent(`Hello! I want to order 1 piece of: ${dress.name}. \nTotal Price: ₦${dress.price.toLocaleString()}`);
+                
                 grid.innerHTML += `
                     <div class="product-card">
                         <img src="${dress.imageUrl}" alt="${dress.name}">
                         <h3>${dress.name}</h3>
-                        <p>₦${dress.price.toLocaleString()}</p>
-                        <a href="${waLink}" class="order-btn" target="_blank">ORDER NOW</a>
+                        <span class="price-tag">₦${dress.price.toLocaleString()}</span>
+                        
+                        <div class="qty-container">
+                            <button class="qty-btn" onclick="changeQty('${id}', -1, '${dress.name}', ${dress.price})">-</button>
+                            <span class="qty-number" id="qty-${id}">1</span>
+                            <button class="qty-btn" onclick="changeQty('${id}', 1, '${dress.name}', ${dress.price})">+</button>
+                        </div>
+
+                        <a href="https://wa.me/${WHATSAPP_NUMBER}?text=${initialMsg}" 
+                           id="btn-${id}" 
+                           class="order-btn" 
+                           target="_blank">ORDER NOW</a>
                     </div>
                 `;
             });
         } catch (error) {
-            console.error("Error loading products:", error);
+            console.error("Error:", error);
             document.getElementById('loading').innerText = "Failed to load shop.";
         }
     }

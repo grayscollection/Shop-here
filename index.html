@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GRAY COLLECTION</title>
     <style>
-        body { font-family: sans-serif; margin: 0; background: #fff5f8; padding-bottom: 120px; }
+        body { font-family: sans-serif; margin: 0; background: #fff5f8; padding-bottom: 140px; }
         header { background: #d63384; color: white; padding: 20px; text-align: center; }
         
         #shop-grid { 
@@ -23,29 +23,50 @@
         .product-card h3 { font-size: 15px; margin: 10px 0 5px; color: #333; }
         .product-card .price-tag { color: #d63384; font-weight: bold; margin-bottom: 10px; display: block; }
 
-        /* Quantity Controls */
-        .qty-box { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px; }
-        .qty-btn { background: #f0f0f0; border: none; width: 25px; height: 25px; border-radius: 50%; cursor: pointer; font-weight: bold; }
+        /* VIBRANT QUANTITY CONTROLS */
+        .qty-box { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 15px; 
+            margin-bottom: 12px; 
+            background: #fdf2f2;
+            padding: 5px;
+        }
+        .qty-btn { 
+            background: #d63384; 
+            color: white; 
+            border: none; 
+            width: 35px; 
+            height: 35px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-size: 20px; 
+            font-weight: bold; 
+        }
+        .qty-number { font-size: 18px; font-weight: bold; color: #333; min-width: 25px; }
         
         .add-btn {
-            background-color: #d63384; color: white; border: none;
-            padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; width: 80%;
+            background-color: #333; color: white; border: none;
+            padding: 10px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; width: 90%;
+            text-transform: uppercase; font-size: 12px;
         }
 
         /* Cart Bar */
         .cart-bar {
             position: fixed; bottom: 0; left: 0; right: 0;
-            background: white; padding: 15px 20px; box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+            background: white; padding: 15px 20px; box-shadow: 0 -5px 15px rgba(0,0,0,0.2);
             display: flex; flex-direction: column; gap: 10px; z-index: 1000;
         }
         .cart-row { display: flex; justify-content: space-between; align-items: center; }
-        .cart-info { font-weight: bold; font-size: 14px; }
+        .cart-info { font-weight: bold; font-size: 16px; color: #d63384; }
         
         .checkout-btn {
             background-color: #25D366; color: white; text-decoration: none;
-            padding: 12px; border-radius: 8px; font-weight: bold; text-align: center;
+            padding: 15px; border-radius: 8px; font-weight: bold; text-align: center;
+            font-size: 18px; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
         }
-        .clear-btn { color: #888; font-size: 12px; background: none; border: none; text-decoration: underline; }
+        .clear-btn { color: #888; font-size: 13px; background: #eee; border: none; padding: 5px 10px; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -60,10 +81,10 @@
 
 <div class="cart-bar" id="cart-bar" style="display: none;">
     <div class="cart-row">
-        <div class="cart-info">Items: <span id="cart-count">0</span> | Total: ₦<span id="cart-total">0</span></div>
-        <button class="clear-btn" onclick="clearCart()">Clear All</button>
+        <div class="cart-info">Total Items: <span id="cart-count">0</span><br>Total: ₦<span id="cart-total">0</span></div>
+        <button class="clear-btn" onclick="clearCart()">Empty Cart</button>
     </div>
-    <a href="#" class="checkout-btn" id="whatsapp-checkout" target="_blank"ORDER NOW</a>
+    <a href="#" class="checkout-btn" id="whatsapp-checkout" target="_blank">ORDER NOW</a>
 </div>
 
 <script>
@@ -73,7 +94,6 @@
 
     let cart = [];
 
-    // Change qty display before adding to cart
     function changeDisplayQty(id, delta) {
         const span = document.getElementById(`display-qty-${id}`);
         let current = parseInt(span.innerText);
@@ -84,24 +104,23 @@
 
     function addToCart(name, price, id) {
         const qty = parseInt(document.getElementById(`display-qty-${id}`).innerText);
-        
-        // Check if item exists, update it, or add new
         const existing = cart.find(item => item.name === name);
         if(existing) {
             existing.qty += qty;
         } else {
             cart.push({ name, price, qty });
         }
-        
-        // Reset display to 1 for next pick
         document.getElementById(`display-qty-${id}`).innerText = "1";
         updateCartUI();
+        alert(qty + " " + name + " added to order!");
     }
 
     function clearCart() {
-        cart = [];
-        document.getElementById('cart-bar').style.display = 'none';
-        updateCartUI();
+        if(confirm("Clear your order?")) {
+            cart = [];
+            document.getElementById('cart-bar').style.display = 'none';
+            updateCartUI();
+        }
     }
 
     function updateCartUI() {
@@ -114,16 +133,16 @@
 
         let total = 0;
         let count = 0;
-        let summary = "Hello! I want to order:\n\n";
+        let summary = "Hello GRAY COLLECTION! I want to order:\n\n";
         
         cart.forEach((item) => {
             const itemTotal = item.price * item.qty;
             total += itemTotal;
             count += item.qty;
-            summary += `• ${item.name} (Qty: ${item.qty}) - ₦${itemTotal.toLocaleString()}\n`;
+            summary += `✅ ${item.name} (Qty: ${item.qty}) - ₦${itemTotal.toLocaleString()}\n`;
         });
 
-        summary += `\n*TOTAL AMOUNT: ₦${total.toLocaleString()}*`;
+        summary += `\n💰 *GRAND TOTAL: ₦${total.toLocaleString()}*`;
         
         cartCount.innerText = count;
         cartTotal.innerText = total.toLocaleString();
@@ -146,15 +165,15 @@
                         <span class="price-tag">₦${dress.price.toLocaleString()}</span>
                         
                         <div class="qty-box">
-                            <button class="qty-btn" onclick="changeDisplayQty('${cleanId}', -1)">-</button>
-                            <span id="display-qty-${cleanId}">1</span>
+                            <button class="qty-btn" onclick="changeDisplayQty('${cleanId}', -1)">−</button>
+                            <span class="qty-number" id="display-qty-${cleanId}">1</span>
                             <button class="qty-btn" onclick="changeDisplayQty('${cleanId}', 1)">+</button>
                         </div>
                         
                         <button class="add-btn" onclick="addToCart('${dress.name}', ${dress.price}, '${cleanId}')">Add to Order</button>
                     </div>`;
             });
-        } catch (e) { document.getElementById('loading').innerText = "Error loading shop."; }
+        } catch (e) { document.getElementById('loading').innerText = "Check connection..."; }
     }
 
     fetchDresses();

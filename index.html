@@ -5,57 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GRAY COLLECTION</title>
     <style>
-        body { font-family: sans-serif; margin: 0; background: #fff5f8; }
+        body { font-family: sans-serif; margin: 0; background: #fff5f8; padding-bottom: 100px; }
         header { background: #d63384; color: white; padding: 20px; text-align: center; }
         
         #shop-grid { 
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
-            gap: 15px; 
-            padding: 20px; 
+            gap: 15px; padding: 20px; 
         }
 
         .product-card { 
-            background: white; 
-            border-radius: 10px; 
-            overflow: hidden; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            text-align: center;
-            padding-bottom: 15px;
+            background: white; border-radius: 10px; overflow: hidden; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; padding-bottom: 15px;
         }
 
         .product-card img { width: 100%; height: 200px; object-fit: cover; }
         .product-card h3 { font-size: 16px; margin: 10px 0 5px; color: #333; }
         .product-card .price-tag { color: #d63384; font-weight: bold; margin-bottom: 10px; display: block; }
 
-        /* Quantity Selector Styling */
-        .qty-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 15px;
-            gap: 10px;
+        .add-btn {
+            background-color: #d63384; color: white; border: none;
+            padding: 10px 15px; border-radius: 5px; font-weight: bold; cursor: pointer;
         }
-        .qty-btn {
-            background: #eee;
-            border: none;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .qty-number { font-weight: bold; min-width: 20px; }
 
-        .order-btn {
-            display: inline-block;
-            background-color: #25D366; 
-            color: white;
-            text-decoration: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            font-size: 13px;
-            font-weight: bold;
+        /* Floating Cart Bar */
+        .cart-bar {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: white; padding: 20px; box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+            display: flex; justify-content: space-between; align-items: center; z-index: 1000;
+        }
+        .cart-info { font-weight: bold; color: #333; }
+        .checkout-btn {
+            background-color: #25D366; color: white; text-decoration: none;
+            padding: 12px 20px; border-radius: 8px; font-weight: bold;
         }
     </style>
 </head>
@@ -69,75 +51,72 @@
     <p id="loading">Loading products...</p>
 </div>
 
+<div class="cart-bar" id="cart-bar" style="display: none;">
+    <div class="cart-info">
+        Items: <span id="cart-count">0</span> | Total: ₦<span id="cart-total">0</span>
+    </div>
+    <a href="#" class="checkout-btn" id="whatsapp-checkout" target="_blank">Order via WhatsApp</a>
+</div>
+
 <script>
     const PROJECT_ID = "q044uw50";
     const DATASET = "production";
     const WHATSAPP_NUMBER = "2349133269825"; 
 
-    const QUERY = encodeURIComponent('*[_type == "product"]{_id, name, price, "imageUrl": image.asset->url}');
-    const URL = `https://${PROJECT_ID}.api.sanity.io/v2021-10-21/data/query/${DATASET}?query=${QUERY}`;
+    let cart = [];
 
-    // Function to update the WhatsApp link based on quantity
-    function updateOrderLink(id, name, basePrice) {
-        const qty = document.getElementById(`qty-${id}`).innerText;
-        const total = basePrice * qty;
-        const btn = document.getElementById(`btn-${id}`);
-        
-        const message = encodeURIComponent(`Hello! I want to order ${qty} pieces of: ${name}. \nTotal Price: ₦${total.toLocaleString()}`);
-        btn.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`;
+    // Add to Cart Logic
+    function addToCart(name, price) {
+        cart.push({ name, price });
+        updateCartUI();
     }
 
-    // Function to increase/decrease quantity
-    function changeQty(id, delta, name, basePrice) {
-        const qtyElement = document.getElementById(`qty-${id}`);
-        let currentQty = parseInt(qtyElement.innerText);
-        currentQty += delta;
+    function updateCartUI() {
+        const cartBar = document.getElementById('cart-bar');
+        const cartCount = document.getElementById('cart-count');
+        const cartTotal = document.getElementById('cart-total');
+        const checkoutBtn = document.getElementById('whatsapp-checkout');
+
+        if (cart.length > 0) {
+            cartBar.style.display = 'flex';
+        }
+
+        let total = 0;
+        let itemNames = "";
         
-        if (currentQty < 1) currentQty = 1; // Minimum 1 item
-        
-        qtyElement.innerText = currentQty;
-        updateOrderLink(id, name, basePrice);
+        cart.forEach((item, index) => {
+            total += item.price;
+            itemNames += `${index + 1}. ${item.name} (₦${item.price.toLocaleString()})\n`;
+        });
+
+        cartCount.innerText = cart.length;
+        cartTotal.innerText = total.toLocaleString();
+
+        // Create the multi-item WhatsApp message
+        const message = encodeURIComponent(`Hello! I want to order the following items:\n\n${itemNames}\nTotal Amount: ₦${total.toLocaleString()}`);
+        checkoutBtn.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`;
     }
 
     async function fetchDresses() {
         try {
-            const response = await fetch(URL);
+            const response = await fetch(`https://${PROJECT_ID}.api.sanity.io/v2021-10-21/data/query/${DATASET}?query=${encodeURIComponent('*[_type == "product"]{name, price, "imageUrl": image.asset->url}')}`);
             const data = await response.json();
             const grid = document.getElementById('shop-grid');
             
-            if (data.result.length === 0) {
-                grid.innerHTML = "<p>No products found.</p>";
-                return;
-            }
-
             grid.innerHTML = ""; 
 
             data.result.forEach(dress => {
-                const id = dress._id.replace(/[^a-zA-Z0-9]/g, ''); // Clean ID for HTML
-                const initialMsg = encodeURIComponent(`Hello! I want to order 1 piece of: ${dress.name}. \nTotal Price: ₦${dress.price.toLocaleString()}`);
-                
                 grid.innerHTML += `
                     <div class="product-card">
                         <img src="${dress.imageUrl}" alt="${dress.name}">
                         <h3>${dress.name}</h3>
                         <span class="price-tag">₦${dress.price.toLocaleString()}</span>
-                        
-                        <div class="qty-container">
-                            <button class="qty-btn" onclick="changeQty('${id}', -1, '${dress.name}', ${dress.price})">-</button>
-                            <span class="qty-number" id="qty-${id}">1</span>
-                            <button class="qty-btn" onclick="changeQty('${id}', 1, '${dress.name}', ${dress.price})">+</button>
-                        </div>
-
-                        <a href="https://wa.me/${WHATSAPP_NUMBER}?text=${initialMsg}" 
-                           id="btn-${id}" 
-                           class="order-btn" 
-                           target="_blank">ORDER NOW</a>
+                        <button class="add-btn" onclick="addToCart('${dress.name}', ${dress.price})">Add to Order</button>
                     </div>
                 `;
             });
         } catch (error) {
-            console.error("Error:", error);
-            document.getElementById('loading').innerText = "Failed to load shop.";
+            document.getElementById('loading').innerText = "Error loading products.";
         }
     }
 

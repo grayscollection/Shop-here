@@ -21,9 +21,20 @@
 
         .product-card img { width: 100%; height: 180px; object-fit: cover; border-bottom: 2px solid #fdf2f2; }
         .product-card h3 { font-size: 14px; margin: 10px 5px; color: #444; text-transform: uppercase; }
-        .product-card .price-tag { color: #d63384; font-weight: bold; margin-bottom: 12px; display: block; font-size: 16px; }
+        .product-card .price-tag { color: #d63384; font-weight: bold; margin-bottom: 8px; display: block; font-size: 16px; }
 
-        /* HIGH VISIBILITY CONTROLS */
+        /* Color & Size Dropdowns */
+        .option-select {
+            width: 85%;
+            padding: 8px;
+            margin-bottom: 5px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            font-size: 12px;
+            background: #fff;
+            color: #333;
+        }
+
         .qty-row { 
             display: flex; 
             align-items: center; 
@@ -56,7 +67,6 @@
             font-size: 11px; letter-spacing: 1px;
         }
 
-        /* ORDER BAR */
         .order-bar {
             position: fixed; bottom: 0; left: 0; right: 0;
             background: white; padding: 20px; box-shadow: 0 -5px 20px rgba(0,0,0,0.15);
@@ -100,7 +110,6 @@
 
     let cartData = [];
 
-    // Function to change number before adding
     function adjustQty(id, amount) {
         const display = document.getElementById(`qty-num-${id}`);
         let current = parseInt(display.innerText);
@@ -111,15 +120,19 @@
 
     function addItemToCart(name, price, id) {
         const selectedQty = parseInt(document.getElementById(`qty-num-${id}`).innerText);
+        const selectedSize = document.getElementById(`size-${id}`) ? document.getElementById(`size-${id}`).value : "N/A";
+        const selectedColor = document.getElementById(`color-${id}`) ? document.getElementById(`color-${id}`).value : "N/A";
         
-        const itemExists = cartData.find(i => i.name === name);
+        // Check if item with SAME size and color exists
+        const itemExists = cartData.find(i => i.name === name && i.size === selectedSize && i.color === selectedColor);
+        
         if(itemExists) {
             itemExists.qty += selectedQty;
         } else {
-            cartData.push({ name, price, qty: selectedQty });
+            cartData.push({ name, price, qty: selectedQty, size: selectedSize, color: selectedColor });
         }
         
-        document.getElementById(`qty-num-${id}`).innerText = "1"; // Reset card display
+        document.getElementById(`qty-num-${id}`).innerText = "1";
         refreshOrderBar();
     }
 
@@ -145,10 +158,10 @@
             let lineTotal = item.price * item.qty;
             grandTotal += lineTotal;
             totalItems += item.qty;
-            textMessage += `• ${item.name} (${item.qty} pcs) - ₦${lineTotal.toLocaleString()}\n`;
+            textMessage += `• ${item.name}\n  Size: ${item.size} | Color: ${item.color}\n  (${item.qty} pcs) - ₦${lineTotal.toLocaleString()}\n\n`;
         });
 
-        textMessage += `\n*GRAND TOTAL: ₦${grandTotal.toLocaleString()}*`;
+        textMessage += `*GRAND TOTAL: ₦${grandTotal.toLocaleString()}*`;
         
         countTxt.innerText = totalItems;
         totalTxt.innerText = grandTotal.toLocaleString();
@@ -157,19 +170,31 @@
 
     async function getProducts() {
         try {
-            const res = await fetch(`https://${PROJECT_ID}.api.sanity.io/v2021-10-21/data/query/${DATASET}?query=${encodeURIComponent('*[_type == "product"]{_id, name, price, "imageUrl": image.asset->url}')}`);
+            // Updated Query to fetch colors and sizes
+            const res = await fetch(`https://${PROJECT_ID}.api.sanity.io/v2021-10-21/data/query/${DATASET}?query=${encodeURIComponent('*[_type == "product"]{_id, name, price, colors, sizes, "imageUrl": image.asset->url}')}`);
             const json = await res.json();
             const grid = document.getElementById('shop-grid');
             grid.innerHTML = ""; 
 
             json.result.forEach(p => {
                 const uniqueId = p._id.replace(/[^a-zA-Z0-9]/g, '');
+                
+                // Convert comma strings into arrays
+                const sizeList = p.sizes ? p.sizes.split(',').map(s => s.trim()) : [];
+                const colorList = p.colors ? p.colors.split(',').map(c => c.trim()) : [];
+
+                let sizeSelect = p.sizes ? `<select id="size-${uniqueId}" class="option-select">` + sizeList.map(s => `<option value="${s}">${s}</option>`).join('') + `</select>` : '';
+                let colorSelect = p.colors ? `<select id="color-${uniqueId}" class="option-select">` + colorList.map(c => `<option value="${c}">${c}</option>`).join('') + `</select>` : '';
+
                 grid.innerHTML += `
                     <div class="product-card">
                         <img src="${p.imageUrl}" alt="product">
                         <h3>${p.name}</h3>
                         <span class="price-tag">₦${p.price.toLocaleString()}</span>
                         
+                        ${sizeSelect}
+                        ${colorSelect}
+
                         <div class="qty-row">
                             <button class="btn-plus-minus" onclick="adjustQty('${uniqueId}', -1)">-</button>
                             <span class="number-display" id="qty-num-${uniqueId}">1</span>

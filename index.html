@@ -6,19 +6,19 @@
     <title>GRAY COLLECTION | PREMIUM</title>
     <style>
         :root {
-            --bg: #0f0f0f;
-            --card-bg: #1a1a1a;
-            --gold: #d4af37;
-            --text: #ffffff;
-            --muted: #a0a0a0;
-            --border: #333333;
+            --primary-green: #006400; /* Deep Forest Green */
+            --light-green: #e8f5e9;
+            --white: #ffffff;
+            --text-dark: #1a1a1a;
+            --text-muted: #666666;
+            --border: #e0e0e0;
         }
 
         body { 
             font-family: 'Inter', -apple-system, sans-serif; 
             margin: 0; 
-            background: var(--bg); 
-            color: var(--text);
+            background: #f9f9f9; 
+            color: var(--text-dark);
             padding-bottom: 220px; 
             scroll-behavior: smooth;
         }
@@ -26,15 +26,16 @@
         header { 
             padding: 40px 20px; 
             text-align: center; 
-            background: linear-gradient(to bottom, #1a1a1a, #0f0f0f);
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
         }
 
         header h1 { 
             margin: 0; 
-            font-size: 28px; 
-            letter-spacing: 6px; 
-            font-weight: 200; 
-            color: var(--gold);
+            font-size: 26px; 
+            letter-spacing: 4px; 
+            font-weight: 700; 
+            color: var(--primary-green);
             text-transform: uppercase;
         }
 
@@ -42,7 +43,7 @@
             display: flex;
             justify-content: center;
             gap: 10px;
-            margin-bottom: 20px;
+            margin-top: 20px;
         }
 
         .helper-launcher, .gift-launcher {
@@ -51,97 +52,157 @@
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 1px;
-            border: 1px solid var(--gold);
+            border: 1.5px solid var(--primary-green);
             cursor: pointer;
             border-radius: 4px;
+            transition: 0.3s;
         }
 
-        .helper-launcher { background: var(--gold); color: black; }
-        .gift-launcher { background: transparent; color: var(--gold); }
+        .helper-launcher { background: var(--primary-green); color: white; }
+        .gift-launcher { background: transparent; color: var(--primary-green); }
+        .gift-launcher:hover { background: var(--light-green); }
 
+        /* Modal Styles */
         #helperModal, #giftModal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95);
+            background: rgba(0,0,0,0.7);
             z-index: 20000;
             justify-content: center;
             align-items: center;
         }
 
         .modal-content {
-            background: var(--card-bg);
+            background: var(--white);
             padding: 30px;
             width: 85%;
             max-width: 380px;
-            border: 1px solid var(--gold);
+            border-radius: 8px;
             text-align: center;
         }
 
-        .modal-content h2 { color: var(--gold); font-size: 18px; margin-bottom: 20px; text-transform: uppercase; }
+        .modal-content h2 { color: var(--primary-green); font-size: 18px; margin-bottom: 20px; text-transform: uppercase; }
         .modal-content input, .modal-content select {
             width: 100%; padding: 12px; margin-bottom: 15px;
-            background: #000; border: 1px solid var(--border); color: white;
-            box-sizing: border-box;
+            background: #fff; border: 1px solid var(--border); color: #333;
+            box-sizing: border-box; border-radius: 5px;
         }
 
-        .close-modal { color: var(--muted); cursor: pointer; display: block; margin-top: 15px; font-size: 12px; text-transform: uppercase; }
+        .close-modal { color: var(--text-muted); cursor: pointer; display: block; margin-top: 15px; font-size: 12px; text-transform: uppercase; }
 
+        /* Filter Section */
         .filter-wrapper {
             position: sticky; top: 0; z-index: 1000;
-            background: rgba(15, 15, 15, 0.9);
-            backdrop-filter: blur(15px);
-            padding: 20px; border-bottom: 1px solid var(--border);
-            display: flex; flex-direction: column; gap: 15px; align-items: center;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px; border-bottom: 1px solid var(--border);
+            display: flex; flex-direction: column; gap: 10px; align-items: center;
         }
 
-        #searchInput { width: 90%; max-width: 500px; border-radius: 30px; background: #222; border: 1px solid var(--border); color: white; padding: 12px 20px; outline: none; }
+        #searchInput { width: 90%; max-width: 500px; border-radius: 8px; background: #fff; border: 1px solid var(--border); padding: 12px 15px; outline: none; }
         .price-inputs { display: flex; gap: 10px; width: 90%; max-width: 500px; }
-        .price-inputs input { width: 50%; background: #222; border: 1px solid var(--border); color: white; padding: 10px; border-radius: 5px; }
+        .price-inputs input { width: 50%; background: #fff; border: 1px solid var(--border); padding: 10px; border-radius: 5px; }
 
-        #shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 20px; padding: 20px; }
-        .product-card { background: var(--card-bg); border: 1px solid var(--border); overflow: hidden; position: relative; transition: 0.3s; }
-        .badge { position: absolute; top: 10px; left: 10px; background: var(--gold); color: black; font-size: 9px; font-weight: bold; padding: 4px 8px; z-index: 10; }
-        .img-container { width: 100%; height: 240px; overflow: hidden; border-bottom: 2px solid var(--gold); }
+        /* Product Grid */
+        #shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; padding: 15px; }
+        
+        .product-card { 
+            background: var(--white); 
+            border: 1px solid var(--border); 
+            border-radius: 8px;
+            overflow: hidden; 
+            position: relative; 
+            transition: transform 0.2s; 
+        }
+        
+        .badge { position: absolute; top: 10px; left: 10px; background: var(--primary-green); color: white; font-size: 9px; font-weight: bold; padding: 4px 8px; z-index: 10; border-radius: 2px; }
+        
+        .img-container { width: 100%; height: 200px; overflow: hidden; background: #f0f0f0; }
         .product-card img { width: 100%; height: 100%; object-fit: cover; }
-        .details { padding: 12px; }
-        .details h3 { font-size: 11px; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; letter-spacing: 1px; }
-        .price { font-size: 16px; color: var(--gold); font-weight: bold; margin-bottom: 12px; display: block; }
         
-        .qty-box { display: flex; justify-content: space-between; align-items: center; background: #000; padding: 4px; margin-bottom: 12px; border: 1px solid var(--border); }
-        .qty-box button { background: none; border: none; color: var(--gold); font-size: 18px; cursor: pointer; }
+        .details { padding: 12px; text-align: left; }
+        .details h3 { font-size: 12px; text-transform: capitalize; color: var(--text-dark); margin: 0 0 5px; }
+        .price { font-size: 15px; color: var(--primary-green); font-weight: bold; margin-bottom: 10px; display: block; }
         
-        .add-btn { width: 100%; background: var(--gold); color: #000; border: none; padding: 12px; font-weight: bold; text-transform: uppercase; font-size: 10px; cursor: pointer; }
+        select { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid var(--border); border-radius: 4px; font-size: 11px; }
 
-        .order-bar { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 500px; background: var(--gold); padding: 15px; z-index: 10000; color: #000; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 15px 40px rgba(0,0,0,0.6); }
-        .buy-now { background: #000; color: #fff; text-align: center; text-decoration: none; padding: 14px; font-weight: bold; font-size: 14px; }
+        .qty-box { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            background: var(--light-green); 
+            padding: 5px 10px; 
+            margin-bottom: 10px; 
+            border-radius: 4px;
+        }
+        .qty-box button { background: none; border: none; color: var(--primary-green); font-size: 20px; cursor: pointer; font-weight: bold; }
+        .qty-box span { font-weight: bold; font-size: 14px; }
+        
+        .add-btn { 
+            width: 100%; 
+            background: var(--primary-green); 
+            color: white; 
+            border: none; 
+            padding: 12px; 
+            font-weight: bold; 
+            text-transform: uppercase; 
+            font-size: 11px; 
+            cursor: pointer; 
+            border-radius: 4px;
+        }
+
+        /* Order Bar */
+        .order-bar { 
+            position: fixed; 
+            bottom: 30px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            width: 90%; 
+            max-width: 500px; 
+            background: var(--white); 
+            padding: 20px; 
+            z-index: 10000; 
+            border-radius: 12px;
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15); 
+            border: 1px solid var(--primary-green);
+        }
+        
+        .order-info { display: flex; justify-content: space-between; font-weight: bold; font-size: 15px; color: var(--primary-green); }
+        
+        .buy-now { 
+            background: var(--primary-green); 
+            color: #fff; 
+            text-align: center; 
+            text-decoration: none; 
+            padding: 15px; 
+            font-weight: bold; 
+            font-size: 14px; 
+            border-radius: 6px;
+        }
 
         footer { 
             text-align: center; 
             padding: 40px 20px; 
             font-size: 11px; 
-            color: var(--muted); 
-            letter-spacing: 1px; 
+            color: var(--text-muted); 
+            background: var(--white);
             border-top: 1px solid var(--border); 
             margin-top: 40px; 
-            line-height: 1.8;
         }
         
         footer a { 
-            color: var(--gold); 
+            color: var(--primary-green); 
             text-decoration: none; 
             font-weight: bold; 
-            border: 1px solid var(--gold);
+            border: 1px solid var(--primary-green);
             padding: 4px 8px;
-            margin-left: 5px;
+            margin-top: 10px;
             display: inline-block;
             border-radius: 3px;
-            transition: 0.3s;
-        }
-
-        footer a:hover {
-            background: var(--gold);
-            color: black;
         }
     </style>
 </head>
@@ -151,14 +212,14 @@
     <h1>GRAY COLLECTION</h1>
     <div class="action-row">
         <button class="helper-launcher" onclick="openModal('helperModal')">✨ Style Helper</button>
-        <button class="gift-launcher" onclick="openModal('giftModal')">🎁 Appreciate Tobi Gray</button>
+        <button class="gift-launcher" onclick="openModal('giftModal')">🎁 Appreciate CEO</button>
     </div>
 </header>
 
 <div id="helperModal">
     <div class="modal-content">
         <h2>Style Concierge</h2>
-        <input type="text" id="hHeight" placeholder="Height">
+        <input type="text" id="hHeight" placeholder="Your Height">
         <select id="hSize">
             <option value="">Choose Size</option>
             <option value="S">Small</option>
@@ -179,8 +240,8 @@
 
 <div id="giftModal">
     <div class="modal-content">
-        <h2>Appreciate Tobi Gray</h2>
-        <p style="font-size: 12px; color: var(--muted); margin-bottom: 15px;">Choose an amount to gift the CEO</p>
+        <h2>Appreciate CEO</h2>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Choose an amount to gift Tobi Gray</p>
         <select id="giftAmount">
             <option value="₦2,000">₦2,000</option>
             <option value="₦5,000">₦5,000</option>
@@ -195,25 +256,25 @@
 </div>
 
 <div class="filter-wrapper">
-    <input type="text" id="searchInput" placeholder="SEARCH PIECES..." onkeyup="applyFilters()">
+    <input type="text" id="searchInput" placeholder="Search our collection..." onkeyup="applyFilters()">
     <div class="price-inputs">
-        <input type="number" id="minPrice" placeholder="MIN ₦" onkeyup="applyFilters()">
-        <input type="number" id="maxPrice" placeholder="MAX ₦" onkeyup="applyFilters()">
+        <input type="number" id="minPrice" placeholder="Min ₦" onkeyup="applyFilters()">
+        <input type="number" id="maxPrice" placeholder="Max ₦" onkeyup="applyFilters()">
     </div>
 </div>
 
-<div id="shop-grid"><p style="text-align: center; width: 100%;">Loading Luxury...</p></div>
+<div id="shop-grid"><p style="text-align: center; width: 100%; color: var(--text-muted);">Curating Luxury...</p></div>
 
 <div class="order-bar" id="order-bar" style="display: none;">
-    <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 13px;">
-        <span>Cart (<span id="cart-count">0</span>)</span>
+    <div class="order-info">
+        <span>Cart (<span id="cart-count">0</span> Items)</span>
         <span>Total: ₦<span id="cart-total">0</span></span>
     </div>
     <a href="#" class="buy-now" id="wa-link" target="_blank">ORDER VIA WHATSAPP</a>
 </div>
 
 <footer>
-    Created by <b>KELVIN THE DESIGNER</b> copyright ©️ 2026<br>
+    Created by <b>KELVIN THE DESIGNER</b> &copy; 2026<br>
     <a href="https://wa.me/2349032320783?text=Hello%20Kelvin!%20I%20saw%20your%20design%20on%20Gray%20Collection%20and%20I%20want%20to%20work%20with%20you.">CONTACT THE DESIGNER</a>
 </footer>
 
@@ -258,22 +319,33 @@
 
     function addItemToCart(name, price, id) {
         const q = parseInt(document.getElementById(`qty-num-${id}`).innerText);
-        const s = document.getElementById(`size-${id}`)?.value || "N/A";
-        const c = document.getElementById(`color-${id}`)?.value || "N/A";
-        const item = cartData.find(i => i.name === name && i.size === s);
-        if(item) item.qty += q; else cartData.push({ name, price, qty: q, size: s, color: c });
+        const s = document.getElementById(`size-${id}`)?.value || "Default";
+        
+        const existingItem = cartData.find(i => i.name === name && i.size === s);
+        if(existingItem) {
+            existingItem.qty += q;
+        } else {
+            cartData.push({ name, price, qty: q, size: s });
+        }
+        
+        alert(q + " item(s) added to cart!");
         refreshOrderBar();
     }
 
     function refreshOrderBar() {
         const bar = document.getElementById('order-bar');
         if (cartData.length > 0) bar.style.display = 'flex';
+        
         let grand = 0; let count = 0;
-        let msg = "Order Details:\n";
+        let msg = "Hello Gray Collection! I want to order:\n\n";
+        
         cartData.forEach(i => {
-            grand += (i.price * i.qty); count += i.qty;
-            msg += `• ${i.name} (${i.qty}) - ${i.size}\n`;
+            const lineTotal = i.price * i.qty;
+            grand += lineTotal; 
+            count += i.qty;
+            msg += `• ${i.name} (Qty: ${i.qty}) - Size: ${i.size}\n`;
         });
+        
         document.getElementById('cart-count').innerText = count;
         document.getElementById('cart-total').innerText = grand.toLocaleString();
         document.getElementById('wa-link').href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg + "\nTotal: ₦" + grand.toLocaleString())}`;
@@ -283,34 +355,47 @@
         const t = document.getElementById('searchInput').value.toLowerCase();
         const min = parseFloat(document.getElementById('minPrice').value) || 0;
         const max = parseFloat(document.getElementById('maxPrice').value) || Infinity;
+        
+        const cards = document.querySelectorAll('.product-card');
         allProducts.forEach((p, i) => {
             const match = p.name.toLowerCase().includes(t) && p.price >= min && p.price <= max;
-            document.querySelectorAll('.product-card')[i].style.display = match ? 'block' : 'none';
+            cards[i].style.display = match ? 'block' : 'none';
         });
     }
 
     async function getProducts() {
         try {
-            const res = await fetch(`https://${PROJECT_ID}.api.sanity.io/v2021-10-21/data/query/${DATASET}?query=${encodeURIComponent('*[_type == "product"] | order(_createdAt desc){_id, name, price, colors, sizes, "imageUrl": image.asset->url}')}`);
+            const res = await fetch(`https://${PROJECT_ID}.api.sanity.io/v2021-10-21/data/query/${DATASET}?query=${encodeURIComponent('*[_type == "product"] | order(_createdAt desc){_id, name, price, sizes, "imageUrl": image.asset->url}')}`);
             const json = await res.json();
             allProducts = json.result; 
-            const grid = document.getElementById('shop-grid'); grid.innerHTML = ""; 
+            const grid = document.getElementById('shop-grid'); 
+            grid.innerHTML = ""; 
+            
             allProducts.forEach((p, idx) => {
                 const id = p._id.replace(/[^a-zA-Z0-9]/g, '');
-                const s = p.sizes ? p.sizes.split(',').map(x => `<option>${x.trim()}</option>`).join('') : '';
-                grid.innerHTML += `<div class="product-card">
-                    ${idx < 4 ? '<div class="badge">NEW</div>' : ''}
+                const sizeOptions = p.sizes ? p.sizes.split(',').map(x => `<option value="${x.trim()}">${x.trim()}</option>`).join('') : '<option value="Standard">Standard Size</option>';
+                
+                grid.innerHTML += `
+                <div class="product-card">
+                    ${idx < 4 ? '<div class="badge">NEW ARRIVAL</div>' : ''}
                     <div class="img-container"><img src="${p.imageUrl}"></div>
                     <div class="details">
                         <h3>${p.name}</h3>
                         <span class="price">₦${p.price.toLocaleString()}</span>
-                        ${p.sizes ? `<select id="size-${id}">${s}</select>` : ''}
-                        <div class="qty-box"><button onclick="adjustQty('${id}',-1)">-</button><span id="qty-num-${id}">1</span><button onclick="adjustQty('${id}',1)">+</button></div>
+                        <select id="size-${id}">${sizeOptions}</select>
+                        <div class="qty-box">
+                            <button onclick="adjustQty('${id}',-1)">-</button>
+                            <span id="qty-num-${id}">1</span>
+                            <button onclick="adjustQty('${id}',1)">+</button>
+                        </div>
                         <button class="add-btn" onclick="addItemToCart('${p.name}', ${p.price}, '${id}')">Add to Order</button>
                     </div>
                 </div>`;
             });
-        } catch (e) { console.log(e); }
+        } catch (e) { 
+            console.log(e);
+            document.getElementById('shop-grid').innerHTML = "Failed to load products.";
+        }
     }
     getProducts();
 </script>
